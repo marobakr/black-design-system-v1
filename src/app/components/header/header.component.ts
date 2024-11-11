@@ -1,9 +1,8 @@
-import { CommonModule } from '@angular/common';
-import { Component, HostListener } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { Component, Inject, PLATFORM_ID } from '@angular/core';
 import Glide from '@glidejs/glide';
 import { CollapseModule } from 'ngx-bootstrap/collapse';
 
-declare const google: any;
 @Component({
   selector: 'app-header',
   standalone: true,
@@ -12,62 +11,22 @@ declare const google: any;
   styleUrl: './header.component.scss',
 })
 export class HeaderComponent {
+  constructor(@Inject(PLATFORM_ID) private platformId: any) {}
+
   isCollapsed1 = true;
 
-  lastScrollTop = 0;
-  delta = 5;
-  navbarHeight = 0;
-
-  constructor() {}
-
-  @HostListener('window:scroll', ['$event'])
-  hasScrolled() {
-    const st = window.pageYOffset;
-    if (Math.abs(this.lastScrollTop - st) <= this.delta) return;
-
-    const navbar = document.getElementById('navbar-top');
-    if (st > this.lastScrollTop && st > this.navbarHeight) {
-      navbar?.classList.replace('nav-down', 'nav-up');
-    } else if (st + window.innerHeight < document.body.scrollHeight) {
-      navbar?.classList.replace('nav-up', 'nav-down');
-    }
-
-    this.lastScrollTop = st;
-  }
-
   ngAfterViewInit() {
-    document.body.classList.add('sections-page');
-    const navbar = document.getElementById('navbar-top');
-    navbar?.classList.add('nav-down');
-    this.hasScrolled();
+    if (isPlatformBrowser(this.platformId)) {
+      document.body.classList.add('sections-page');
+      const navbar = document.getElementById('navbar-top');
+      navbar?.classList.add('nav-down');
 
-    new Glide('.glide1', {
-      type: 'carousel',
-      perView: 4,
-      startAt: 2,
-      focusAt: 2,
-    }).mount();
-
-    // Initialize Google Maps
-    this.initMap();
-  }
-  private initMap() {
-    const mapOptions = {
-      zoom: 13,
-      center: new google.maps.LatLng(40.748817, -73.985428),
-      scrollwheel: false,
-      styles: [
-        /* your style array */
-      ],
-    };
-    const map = new google.maps.Map(
-      document.getElementById('contactUsMap'),
-      mapOptions
-    );
-    const marker = new google.maps.Marker({
-      position: mapOptions.center,
-      title: 'Hello World!',
-    });
-    marker.setMap(map);
+      new Glide('.glide1', {
+        type: 'carousel',
+        perView: 4,
+        startAt: 2,
+        focusAt: 2,
+      }).mount();
+    }
   }
 }
